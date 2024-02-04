@@ -35,7 +35,7 @@ def getIndex(dir):
 
 
 #store each row of each csv file to the index as a document
-def addToIndex(index, csvFile):
+def addToIndex(index, csvFile, filename):
     writer = index.writer()
     for row in csvFile:
         try:
@@ -56,6 +56,7 @@ def addToIndex(index, csvFile):
                 
                 #add the row to the index as a document
                 writer.add_document(reviewID=reviewID, reviewData=reviewData, authorName=authorName, vehicleName=vehicleName, reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating)
+                print(f"The document {filename}:{reviewID} has been added to the index")
         except Exception as e:
             #if an error occurs, skip to the next row
             print(f"Error adding document: {e}")
@@ -77,7 +78,7 @@ def populateIndex(index, dataDirectory):
             with open(file_path, "r", encoding="utf-8") as file:
                 csvFile = reader(file)
                 next(csvFile) #skip the first line of the csv file since it doesn't contain data
-                addToIndex(index, csvFile) #function called for every csv file in the specified directory
+                addToIndex(index, csvFile, filename) #function called for every csv file in the specified directory
 
 
 #if the module 'whooshindex' is ran by itself
