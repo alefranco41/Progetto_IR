@@ -1,4 +1,4 @@
-from whooshIndex import getIndex, fieldList
+from src.whooshIndex import getIndex, fieldList
 from whoosh.qparser import MultifieldParser #enable multiple field search
 from whoosh import scoring #set up the scoring system
 import shutil #for printing purposes
