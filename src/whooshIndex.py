@@ -1,7 +1,7 @@
 from whoosh.fields import Schema, TEXT, KEYWORD, DATETIME, NUMERIC
 from whoosh.index import create_in, open_dir
 from whoosh.writing import BufferedWriter
-from os import path, mkdir, listdir
+from os import path, mkdir, listdir, remove
 from csv import reader #needed to opens csv files
 from sys import exit 
 from datetime import datetime #needed to convert text into dates
@@ -14,10 +14,11 @@ schema = Schema(
     reviewID = NUMERIC(stored=True),
     reviewData = DATETIME(stored=True),
     authorName = TEXT(stored=True),
-    vehicleName = TEXT(stored=True),
+    rawVehicleName = TEXT(stored=True),
     reviewTitle = TEXT(stored=True),
     reviewText = TEXT(stored=True),
-    reviewRating = NUMERIC(stored=True)
+    reviewRating = NUMERIC(stored=True),
+    vehicleName  = TEXT(stored=True)
 )
 
 def getIndex(dir):
@@ -48,14 +49,46 @@ def addToIndex(index, csvFile, filename):
                 reviewData_str = reviewData_str.replace(" (PDT)", "").replace(" (PST)", "")
                 reviewData = datetime.strptime(reviewData_str, "%m/%d/%y %H:%M %p")
                 
+                
+                try:
+                    year = int(row[3].split()[0])
+                except Exception:
+                    vehicleName = row[3]
+                else:
+                    vehicleName = row[3].removeprefix(str(year) + ' ')
+                
+
+                for pattern in ["1dr", "2dr", "3dr", "4dr", "5dr"]:
+                    vehicleName = vehicleName.replace(pattern, "")
+                
+                splittedVehicleName = vehicleName.split()
+                
+                if splittedVehicleName[-1][-1] == ")":
+                    for index, subStr in enumerate(splittedVehicleName):
+                        if subStr[0] == "(":
+                            start_index = index
+                            splittedVehicleName = splittedVehicleName[:start_index]
+                            vehicleName = " ".join(splittedVehicleName)
+                            break
+                
+                            
+                tmp_set = set()
+                tmp_list = list()
+                for name in splittedVehicleName:
+                    if name not in tmp_set:
+                        tmp_list.append(name)
+                        tmp_set.add(name)
+                
+                vehicleName = " ".join(tmp_list)
+
                 authorName = row[2]
-                vehicleName = row[3]
                 reviewTitle = row[4]
                 reviewText = row[5]
                 reviewRating = float(row[6])
                 
+
                 #add the row to the index as a document
-                writer.add_document(reviewID=reviewID, reviewData=reviewData, authorName=authorName, vehicleName=vehicleName, reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating)
+                writer.add_document(reviewID=reviewID, reviewData=reviewData, authorName=authorName, rawVehicleName=row[3], reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating, vehicleName=vehicleName)
                 print(f"The document {filename}:{reviewID} has been added to the index")
         except Exception as e:
             #if an error occurs, skip to the next row
@@ -86,6 +119,5 @@ def populateIndex(index, dataDirectory):
 if __name__ == "__main__":
     dataDirectory = "CSVdata"
     indexDirectory = "index"
-
     index = getIndex(indexDirectory)
     populateIndex(index, dataDirectory)
