@@ -18,7 +18,7 @@ limit = 5 #max amount of documents to show
 
 words_to_remove = set(["car", "cars", "vehicle", "vehicles", "search", "find", "named"])
 stop_words = set(stopwords.words('english')).union(words_to_remove)
-review_words = ["review", "reviews", "opinion", "opinions", "reviewed"]
+review_words = ["review", "reviews", "opinion", "opinions", "reviewed", "rating"]
 
 
 custom_token_pattern = r'\b\w+(?::\w+)?\b'

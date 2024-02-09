@@ -1,8 +1,5 @@
+#full-text mode benchmark queries:
 1) opinions and reviews about lamborghini cars
 2) lamborghini
-
-
-
-TODO:
-
-1) mettere a posto reviews=True/False in parse_query(), ad esempio: "ferrari rating 4" non deve comparire lista macchine
+3) ferrari with review rating 2
+4) vehicleName:ferrari reviewTitle:amazing reviewRating:5

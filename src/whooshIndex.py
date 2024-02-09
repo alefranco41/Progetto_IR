@@ -6,13 +6,13 @@ from csv import reader #needed to opens csv files
 from sys import exit 
 from datetime import datetime #needed to convert text into dates
 
-fieldList = ["reviewData", "authorName", "vehicleName", "reviewTitle", "reviewText", "reviewRating"]
+fieldList = ["reviewDate", "authorName", "vehicleName", "reviewTitle", "reviewText", "reviewRating"]
 
 
 #creating Woosh scheme for indexing
 schema = Schema(
     reviewID = NUMERIC(stored=True),
-    reviewData = DATETIME(stored=True),
+    reviewDate = DATETIME(stored=True),
     authorName = TEXT(stored=True),
     rawVehicleName = TEXT(stored=True),
     reviewTitle = TEXT(stored=True),
@@ -45,9 +45,9 @@ def addToIndex(index, csvFile, filename):
                 reviewID = int(row[0])
                 
                 #convert the second column as a valid date
-                reviewData_str = row[1].replace(" on ", "")
-                reviewData_str = reviewData_str.replace(" (PDT)", "").replace(" (PST)", "")
-                reviewData = datetime.strptime(reviewData_str, "%m/%d/%y %H:%M %p")
+                reviewDate_str = row[1].replace(" on ", "")
+                reviewDate_str = reviewDate_str.replace(" (PDT)", "").replace(" (PST)", "")
+                reviewDate = datetime.strptime(reviewDate_str, "%m/%d/%y %H:%M %p")
                 
                 
                 try:
@@ -88,7 +88,7 @@ def addToIndex(index, csvFile, filename):
                 
 
                 #add the row to the index as a document
-                writer.add_document(reviewID=reviewID, reviewData=reviewData, authorName=authorName, rawVehicleName=row[3], reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating, vehicleName=vehicleName)
+                writer.add_document(reviewID=reviewID, reviewDate=reviewDate, authorName=authorName, rawVehicleName=row[3], reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating, vehicleName=vehicleName)
                 print(f"The document {filename}:{reviewID} has been added to the index")
         except Exception as e:
             #if an error occurs, skip to the next row
