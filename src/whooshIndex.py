@@ -5,8 +5,7 @@ from os import path, mkdir, listdir, remove
 from csv import reader #needed to opens csv files
 from sys import exit 
 from datetime import datetime #needed to convert text into dates
-
-fieldList = ["reviewDate", "authorName", "vehicleName", "reviewTitle", "reviewText", "reviewRating"]
+import globalVariables
 
 
 #creating Woosh scheme for indexing
@@ -99,25 +98,31 @@ def addToIndex(index, csvFile, filename):
 
 
 #for every csv file, add its rows to the index
-def populateIndex(index, dataDirectory):
+def populateIndex(index, dataDirectory, limit):
     try:
         dir = listdir(dataDirectory)
     except FileNotFoundError:
         print(f"Error, directory '{dataDirectory}' not found")
         exit()
     else:
+        i=0
         for filename in dir:
             file_path = path.join(dataDirectory, filename)
             with open(file_path, "r", encoding="utf-8") as file:
                 csvFile = reader(file)
                 next(csvFile) #skip the first line of the csv file since it doesn't contain data
                 addToIndex(index, csvFile, filename) #function called for every csv file in the specified directory
+                i+=1
+            if limit != 0:
+                if i == limit:
+                    break
 
 
 #if the module 'whooshindex' is ran by itself
 #create a new index containing the csv files in the 'CSVdata' directory 
 if __name__ == "__main__":
-    dataDirectory = "CSVdata"
-    indexDirectory = "index"
+    limit = 2 #set this to 0 if you want to index all the files
+    dataDirectory = globalVariables.CSVdataPath
+    indexDirectory = globalVariables.indexPath
     index = getIndex(indexDirectory)
-    populateIndex(index, dataDirectory)
+    populateIndex(index, dataDirectory, limit)

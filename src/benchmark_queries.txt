@@ -1,5 +1,6 @@
 #full-text mode benchmark queries:
-1) opinions and reviews about lamborghini cars
-2) lamborghini
-3) ferrari with review rating 2
-4) vehicleName:ferrari reviewTitle:amazing reviewRating:5
+1) opinions and reviews about dodge cars
+2) dodge
+3) amazing ferrari review with rating 5
+4) vehicleName:ferrari reviewTitle:perfect reviewRating:5
+#word2vec benchmark queries

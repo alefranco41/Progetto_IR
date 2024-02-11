@@ -1,1 +1,4 @@
 Whoosh
+gensim
+pandas
+scikit-learn
