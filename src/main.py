@@ -139,6 +139,9 @@ def word2Vec_mode():
             break
         query_tokens = preprocessing(pd.Series(query_str))[0].split()
         query_embeddings = [globalVariables.word2VecModel[token] for token in query_tokens if token in globalVariables.word2VecModel]
+        if not query_embeddings:
+            print("No valid tokens found in the query.")
+            continue
         query_vector = np.mean([embedding for embedding in query_embeddings], axis=0)
         
 
@@ -147,10 +150,16 @@ def word2Vec_mode():
             search_results.append((doc, similarity))
 
         search_results.sort(key=lambda x: x[1], reverse=True)
+
+        parser = SimpleParser("reviewText", schema=globalVariables.index.schema) #search throughout all of the fields of the schema
+        
+        
         print(f"Results for '{query_str}':\n")
         for i, (doc, similarity) in enumerate(search_results[:globalVariables.limit], 1):
             print(f"Hit result #{i}")
-            print(globalVariables.document_mapping[doc][0]) 
+            query = parser.parse(globalVariables.document_mapping[doc][0]) #parse the query
+            result = globalVariables.searcher.search(query, limit=1, scored=True) #set the document limit to 5 and enable the scoring
+            print_hit_result(result[0], True)
             print(f"Similarity: {similarity}\n")
 #main
 def main():
