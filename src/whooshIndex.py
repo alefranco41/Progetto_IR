@@ -33,15 +33,17 @@ def getIndex(dir):
     return ix
 
 
+currentID = 0
 
 #store each row of each csv file to the index as a document
 def addToIndex(index, csvFile, filename):
+    global currentID
     writer = index.writer()
     for row in csvFile:
         try:
             if len(row) == 7: #skip the rows not matching the scheme
                 #convert the first column to an integer
-                reviewID = int(row[0])
+                reviewID = int(row[0]) + currentID
                 
                 #convert the second column as a valid date
                 reviewDate_str = row[1].replace(" on ", "")
@@ -95,6 +97,7 @@ def addToIndex(index, csvFile, filename):
             continue
     #save the changes to the index
     writer.commit()
+    currentID += reviewID
 
 
 #for every csv file, add its rows to the index

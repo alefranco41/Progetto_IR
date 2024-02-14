@@ -1,6 +1,5 @@
 #full-text mode benchmark queries:
 1) opinions and reviews about dodge cars
-2) dodge
-3) amazing ferrari review with rating 5
-4) vehicleName:ferrari reviewTitle:perfect reviewRating:5
+2) amazing ferrari review with rating 5
+3) vehicleName:ferrari reviewTitle:perfect reviewRating:5
 #word2vec benchmark queries

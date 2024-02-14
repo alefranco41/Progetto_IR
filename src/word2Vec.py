@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import os
 import re
-import time
 from gensim.models import Word2Vec
 from tqdm import tqdm
 from globalVariables import CSVdataPath, word2VecModel, word2VecModelPath

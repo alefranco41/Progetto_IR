@@ -4,9 +4,11 @@ from nltk.tokenize import RegexpTokenizer
 from whooshIndex import getIndex
 from whoosh import scoring #set up the scoring system
 from gensim.models import KeyedVectors
+from sentimentAnalysis import getSentimentIndex
 import pickle
 
 indexPath = "index"
+sentimentIndexPath = "sentiment"
 CSVdataPath = "CSVdata"
 
 word2VecModelPath = "word2VecModel.txt"
@@ -25,7 +27,7 @@ terminal_width = shutil.get_terminal_size().columns
 str_separator = "-" * terminal_width
 
 fieldList = ["reviewDate", "authorName", "vehicleName", "reviewTitle", "reviewText", "reviewRating"]
-
+sentimentFieldList = ["reviewDate", "authorName", "vehicleName", "reviewTitle", "reviewText", "reviewRating", "sentimentScore"]
 
 modes = {1: 'Full text search', 2:'Sentiment analysis', 3:'Word2Vec'}
 mode = 0  #chosen search engine mode
@@ -42,6 +44,8 @@ custom_token_pattern = r'\b\w+(?::\w+)?\b'
 custom_tokenizer = RegexpTokenizer(custom_token_pattern)
 
 index = getIndex(indexPath) #retrieve the index
+sentimentIndex = getSentimentIndex(sentimentIndexPath)
+
 searcher = index.searcher(weighting=scoring.TF_IDF()) #set the scoring system
 
 

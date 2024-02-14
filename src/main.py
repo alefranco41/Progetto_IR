@@ -16,7 +16,7 @@ menu = """
 
 
 #print results of each document found
-def print_hit_result(hit, reviews):
+def print_hit_result(hit, reviews, sentiment):
     if reviews:
         print(f"Vehicle Name: {hit.get('rawVehicleName')}")
         print(f"Review Date: {hit.get('reviewData')}")
@@ -27,6 +27,9 @@ def print_hit_result(hit, reviews):
         print(globalVariables.str_separator)
     else:
         print(f"Vehicle Name: {hit.get('vehicleName')}")
+    
+    if sentiment:
+        print(f"Sentiment Score: {hit.get('sentimentScore')}")
 
 
 
@@ -78,7 +81,14 @@ def parse_query(query_str):
     return query_str, reviews
     
 
-def full_text_mode():
+def full_text_mode(sentiment):
+    if not sentiment:
+        index = globalVariables.index
+        fieldList = globalVariables.fieldList
+    else:
+        index = globalVariables.sentimentIndex
+        fieldList = globalVariables.sentimentFieldList
+    
     while True: 
         query_str = input("Insert query, press enter to stop: ")
         system('clear')
@@ -86,10 +96,13 @@ def full_text_mode():
         if not query_str.strip():
             break
         query_str, reviews = parse_query(query_str)
+        if not sentiment:
+            reviews = True
+
         if reviews:
-            parser = MultifieldParser(globalVariables.fieldList, schema=globalVariables.index.schema) #search throughout all of the fields of the schema
+            parser = MultifieldParser(fieldList, schema=index.schema) #search throughout all of the fields of the schema
         else:
-            parser = SimpleParser("vehicleName", schema=globalVariables.index.schema) #search throughout all of the fields of the schema
+            parser = SimpleParser("vehicleName", schema=index.schema) #search throughout all of the fields of the schema
         query = parser.parse(query_str) #parse the query
         results = globalVariables.searcher.search(query, limit=globalVariables.limit, scored=True) #set the document limit to 5 and enable the scoring
         if results: #if some results are retrieved
@@ -120,14 +133,12 @@ def full_text_mode():
             print(f"Results for '{query_str}': " + "\n")
             for hit in results: #print the documents matching the query
                 print(f"Hit result #{n}")
-                print_hit_result(hit, reviews)
+                print_hit_result(hit, reviews, sentiment)
                 n+=1
         else:
             print(f"No results found for '{query_str}' " + "\n")
 
 
-def sentiment_analysis_mode():
-    pass
 
 def word2Vec_mode():
     while True:
@@ -159,7 +170,7 @@ def word2Vec_mode():
             print(f"Hit result #{i}")
             query = parser.parse(globalVariables.document_mapping[doc][0]) #parse the query
             result = globalVariables.searcher.search(query, limit=1, scored=True) #set the document limit to 5 and enable the scoring
-            print_hit_result(result[0], True)
+            print_hit_result(result[0], True, False)
             print(f"Similarity: {similarity}\n")
 #main
 def main():
@@ -167,9 +178,9 @@ def main():
     mode = get_mode()
     print(f"Mode: {globalVariables.modes[mode]}")
     if mode == 1:
-        full_text_mode()
+        full_text_mode(False)
     elif mode == 2:
-        sentiment_analysis_mode()
+        full_text_mode(True)
     else:
         word2Vec_mode()
         
