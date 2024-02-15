@@ -18,6 +18,7 @@ menu = """
 #print results of each document found
 def print_hit_result(hit, reviews, sentiment):
     if reviews:
+        print(f"Review ID: {hit.get('reviewID')}")
         print(f"Vehicle Name: {hit.get('rawVehicleName')}")
         print(f"Review Date: {hit.get('reviewData')}")
         print(f"Author Name: {hit.get('authorName')}")
@@ -154,24 +155,21 @@ def word2Vec_mode():
             print("No valid tokens found in the query.")
             continue
         query_vector = np.mean([embedding for embedding in query_embeddings], axis=0)
-        
-
-        for doc, (sentence, doc_vector) in globalVariables.document_mapping.items():
+        for doc, doc_vector in globalVariables.word2vec_vectors.items():
             similarity = np.dot(query_vector, doc_vector) / (np.linalg.norm(query_vector) * np.linalg.norm(doc_vector))
+            if isinstance(similarity, np.ndarray):
+                continue
             search_results.append((doc, similarity))
 
         search_results.sort(key=lambda x: x[1], reverse=True)
-
-        parser = SimpleParser("reviewText", schema=globalVariables.index.schema) #search throughout all of the fields of the schema
-        
-        
+        parser = SimpleParser("reviewID", schema=globalVariables.index.schema) #search throughout all of the fields of the schema
         print(f"Results for '{query_str}':\n")
         for i, (doc, similarity) in enumerate(search_results[:globalVariables.limit], 1):
             print(f"Hit result #{i}")
-            query = parser.parse(globalVariables.document_mapping[doc][0]) #parse the query
+            print(f"Similarity: {similarity}\n")
+            query = parser.parse(str(doc)) #parse the query
             result = globalVariables.searcher.search(query, limit=1, scored=True) #set the document limit to 5 and enable the scoring
             print_hit_result(result[0], True, False)
-            print(f"Similarity: {similarity}\n")
 #main
 def main():
     global mode

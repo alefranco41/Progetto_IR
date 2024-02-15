@@ -10,7 +10,7 @@ import pickle
 indexPath = "index"
 sentimentIndexPath = "sentiment"
 CSVdataPath = "CSVdata"
-
+word2VecIndexPath = "word2Vec"
 word2VecModelPath = "word2VecModel.txt"
 try:
     word2VecModel = KeyedVectors.load_word2vec_format(word2VecModelPath)
@@ -18,10 +18,11 @@ except Exception:
     word2VecModel = None
 
 try:
-    with open("Word2VecDocumentMapping.bin", "rb") as file:
-            document_mapping = pickle.load(file)
+    with open("word2vec_vectors.txt", "rb") as file:
+        word2vec_vectors = pickle.load(file)
 except Exception:
-      pass
+    pass
+
 
 terminal_width = shutil.get_terminal_size().columns
 str_separator = "-" * terminal_width
