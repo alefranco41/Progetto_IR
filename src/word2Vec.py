@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import os
 import re
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec,KeyedVectors
 from tqdm import tqdm
-from globalVariables import CSVdataPath, word2VecModel, word2VecModelPath, word2VecIndexPath
+from globalVariables import CSVdataPath, word2VecModel, word2VecModelPath, word2VecIndexPath,review_words
 from sklearn.model_selection import train_test_split
 from whoosh.fields import Schema, TEXT, KEYWORD, DATETIME, NUMERIC
 from whoosh.index import create_in, open_dir
@@ -12,6 +12,9 @@ from csv import reader #needed to opens csv files
 from sys import exit 
 from datetime import datetime #needed to convert text into dates
 import pickle
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
 
 #creating Woosh scheme for indexing
 schema = Schema(
@@ -137,14 +140,17 @@ def populateIndex(index, dataDirectory, limit, model):
 
 tqdm.pandas()
 
-
 def preprocessing(reviews):
     processed_array = []
+    stop_words = set(stopwords.words('english')).union(set(review_words))
+    ps = PorterStemmer()
     for review in tqdm(reviews):
         processed = re.sub('[^a-zA-Z0-9 ]', '', review)
-        words = processed.split()
-        processed_array.append(' '.join([word for word in words if len(word) > 1]))
+        words = processed.lower().split()
+        filtered_words = [ps.stem(word) for word in words if len(word) > 1 and word not in stop_words]
+        processed_array.append(' '.join(filtered_words))
     return processed_array
+
 
 def make_model():
     file_paths = [os.path.join(CSVdataPath, file) for file in os.listdir(CSVdataPath) if file.endswith(".csv")]
@@ -178,15 +184,18 @@ def make_model():
 
 
 if __name__ == "__main__":
-    if not word2VecModel:
-        model = make_model()
-    else:
-        model = word2VecModel
+    while True:
+        try:
+            word2VecModel = KeyedVectors.load_word2vec_format(word2VecModelPath)
+        except Exception:
+            make_model()
+        else:
+            break
     
     limit = 2 #set this to 0 if you want to index all the files
     dataDirectory = CSVdataPath
     indexDirectory = word2VecIndexPath
     index = getIndex(indexDirectory)
-    all_vectors = populateIndex(index, dataDirectory, limit, model)
+    all_vectors = populateIndex(index, dataDirectory, limit, word2VecModel)
     with open("word2vec_vectors.txt", "wb") as file:
         pickle.dump(all_vectors, file)
