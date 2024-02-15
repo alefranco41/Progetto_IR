@@ -23,7 +23,7 @@ schema = Schema(
     reviewText = TEXT(stored=True),
     reviewRating = NUMERIC(stored=True),
     vehicleName  = TEXT(stored=True),
-    sentimentScore    =    KEYWORD(stored=True)
+    sentimentScore    =  TEXT(stored=True)
 )
 
 def get_sentiment(text):
@@ -105,7 +105,6 @@ def addToIndex(index, csvFile, filename):
                 
                 sentiment = get_sentiment(reviewText)
                 #add the row to the index as a document
-                print(sentiment)
                 writer.add_document(reviewID=reviewID, reviewDate=reviewDate, authorName=authorName, rawVehicleName=row[3], reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating, vehicleName=vehicleName, sentimentScore=sentiment)
                 print(f"The document {filename}:{reviewID} has been added to the index")
         except Exception as e:

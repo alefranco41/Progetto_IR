@@ -47,7 +47,8 @@ custom_tokenizer = RegexpTokenizer(custom_token_pattern)
 index = getIndex(indexPath) #retrieve the index
 sentimentIndex = getSentimentIndex(sentimentIndexPath)
 
-searcher = index.searcher(weighting=scoring.TF_IDF()) #set the scoring system
+
+
 
 
 

@@ -104,15 +104,19 @@ def full_text_mode(sentiment):
             parser = MultifieldParser(fieldList, schema=index.schema) #search throughout all of the fields of the schema
         else:
             parser = SimpleParser("vehicleName", schema=index.schema) #search throughout all of the fields of the schema
+        
+        
         query = parser.parse(query_str) #parse the query
-        results = globalVariables.searcher.search(query, limit=globalVariables.limit, scored=True) #set the document limit to 5 and enable the scoring
+        searcher = index.searcher() #set the scoring system
+        results = searcher.search(query, limit=globalVariables.limit, scored=True) #set the document limit to 5 and enable the scoring
         if results: #if some results are retrieved
             if not reviews: #if we are searching about text items (vehicle names and not reviews)
                 extended_results = []
                 #make sure that we don't get any duplicate
                 i = 2
                 while True:
-                    new_results = globalVariables.searcher.search(query, limit=globalVariables.limit*i, scored=True)
+                    searcher = index.searcher() #set the scoring system
+                    new_results = searcher.search(query, limit=globalVariables.limit*i, scored=True)
                     extended_results.extend(new_results)
                     filtered_results = set([" ".join(hit.get('vehicleName').split()[0:2]) for hit in extended_results])
                     if len(filtered_results) >= min(globalVariables.limit, len(results)) or len(extended_results) >= 50000: #to avoid an infinite loop we set a limit to "extended_results"
@@ -168,7 +172,8 @@ def word2Vec_mode():
             print(f"Hit result #{i}")
             print(f"Similarity: {similarity}\n")
             query = parser.parse(str(doc)) #parse the query
-            result = globalVariables.searcher.search(query, limit=1, scored=True) #set the document limit to 5 and enable the scoring
+            searcher = globalVariables.index.searcher() #set the scoring system
+            result = searcher.search(query, limit=1, scored=True) #set the document limit to 5 and enable the scoring
             print_hit_result(result[0], True, False)
 #main
 def main():
