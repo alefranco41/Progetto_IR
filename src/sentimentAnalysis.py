@@ -55,7 +55,6 @@ def addToIndex(index, csvFile, filename, sentimentModel):
                 reviewDate_str = row[1].replace(" on ", "")
                 reviewDate_str = reviewDate_str.replace(" (PDT)", "").replace(" (PST)", "")
                 reviewDate = datetime.strptime(reviewDate_str, "%m/%d/%y %H:%M %p")
-                print(reviewDate)
                 
                 try:
                     year = int(row[3].split()[0])
@@ -99,9 +98,9 @@ def addToIndex(index, csvFile, filename, sentimentModel):
     
                 # Somma i punteggi per ciascuna etichetta moltiplicati per i pesi
                 if sentiment['label'] == 'LABEL_1':
-                    aggregated_score = 1 - sentiment['score']
+                    aggregated_score = sentiment['score'] - (1 - sentiment['score'])
                 else:
-                    aggregated_score = sentiment['score'] - 1
+                    aggregated_score = (1 - sentiment['score']) - sentiment['score']
 
                 if aggregated_score > 0.05:
                     sentimentLabel = "positive"
