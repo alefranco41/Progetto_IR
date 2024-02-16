@@ -2,7 +2,6 @@ import shutil #for printing purposes
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 from whooshIndex import getIndex
-from whoosh import scoring #set up the scoring system
 from gensim.models import KeyedVectors
 from sentimentAnalysis import getSentimentIndex
 import pickle
@@ -28,7 +27,7 @@ terminal_width = shutil.get_terminal_size().columns
 str_separator = "-" * terminal_width
 
 fieldList = ["reviewDate", "authorName", "vehicleName", "reviewTitle", "reviewText", "reviewRating"]
-sentimentFieldList = ["reviewDate", "authorName", "vehicleName", "reviewTitle", "reviewText", "reviewRating", "sentimentScore"]
+sentimentFieldList = ["reviewDate", "authorName", "vehicleName", "reviewTitle", "reviewText", "reviewRating", "sentimentScore", "sentimentLabel"]
 
 modes = {1: 'Full text search', 2:'Sentiment analysis', 3:'Word2Vec'}
 mode = 0  #chosen search engine mode

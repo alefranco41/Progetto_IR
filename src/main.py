@@ -7,6 +7,7 @@ from word2Vec import preprocessing #preprocess the query for word2vec mode
 import pandas as pd
 import numpy as np
 
+
 menu = """
 0) Exit
 1) Full-text search mode
@@ -25,12 +26,14 @@ def print_hit_result(hit, reviews, sentiment):
         print(f"Review Title: {hit.get('reviewTitle')}")
         print(f"Review Text: {hit.get('reviewText')}")
         print(f"Review Rating: {hit.get('reviewRating')}")
-        print(globalVariables.str_separator)
     else:
         print(f"Vehicle Name: {hit.get('vehicleName')}")
     
     if sentiment:
         print(f"Sentiment Score: {hit.get('sentimentScore')}")
+        print(f"Sentiment Label: {hit.get('sentimentLabel')}")
+
+    print(globalVariables.str_separator)
 
 
 
@@ -58,28 +61,7 @@ def get_mode():
 
 
 def parse_query(query_str):
-    if len(query_str.split()) == 1:
-        for word in globalVariables.review_words:
-            if word in query_str:
-                return query_str, True    
-        return query_str, False
-    
-    reviews = False
-    query = globalVariables.custom_tokenizer.tokenize(query_str)
-    filtered_tokens = [word for word in query if word.lower() not in globalVariables.stop_words]
-    for word in globalVariables.review_words:
-        if word in filtered_tokens:
-            filtered_tokens.remove(word)
-            reviews = True
-
-    if not reviews:
-        for word in globalVariables.review_words:
-            if word in query_str:
-                return query_str, True
-            
-    if reviews:
-        return " ".join(filtered_tokens), reviews
-    return query_str, reviews
+    return query_str, True
     
 
 def full_text_mode(sentiment):

@@ -1,5 +1,13 @@
 #full-text mode benchmark queries:
-1) opinions and reviews about dodge cars
-2) amazing ferrari review with rating 5
-3) vehicleName:ferrari reviewTitle:perfect reviewRating:5
+1) tutte le recensioni di dodge -> vehicleName:dodge
+2) tutte le recensioni di ferrari contenenti la parola "amazing" nel testo e con punteggio 4 -> vehicleName:ferrari reviewText:amazing reviewRating:4
+3) tutte le recensioni di ferrari contenenti la parola "perfect" nel titolo e con punteggio 5 -> vehicleName:ferrari reviewTitle:perfect reviewRating:5
+4) tutte le recensioni di dodge contenenti la parola "ferrari" nella recensione -> vehicleName:dodge reviewText:ferrari
+
 #word2vec benchmark queries
+1) this car is garbage
+#sentiment analysis benchmark queries
+1) vehicleName:dodge sentimentLabel:positive
+2)
+3)
+4)
