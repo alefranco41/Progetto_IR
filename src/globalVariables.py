@@ -22,6 +22,8 @@ try:
 except Exception:
     pass
 
+with open("vehicleNames.txt", "rb") as file:
+    vehicleNames = pickle.load(file) 
 
 terminal_width = shutil.get_terminal_size().columns
 str_separator = "-" * terminal_width
