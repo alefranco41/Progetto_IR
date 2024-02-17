@@ -18,7 +18,7 @@ class MyWeighting(BM25F):
         if sentiment_label == "negative":
             sentiment_score = 1 - sentiment_score
         sentiment_factor = sentiment_score * 2 - 1  
-        adjusted_score = score * (1 + sentiment_factor)  # Aggiungi uno sconto o un bonus basato sullo score di sentimento
+        adjusted_score = score * (1 + sentiment_factor)  
         return adjusted_score
 
 menu = """
@@ -45,7 +45,6 @@ def print_hit_result(hit, reviews, sentiment):
     if sentiment:
         print(f"Sentiment Score: {hit.get('sentimentScore')}")
         print(f"Sentiment Label: {hit.get('sentimentLabel')}")
-        print(hit.score)
 
     print(globalVariables.str_separator)
 
@@ -71,21 +70,38 @@ def get_mode():
     system('clear')
     return mode_choice
 
-"""def sass(searcher, fieldname, text, matcher):
-    base_score = matcher.score()
-    docnum = matcher.id()
-    sentiment_score = searcher.stored_fields(docnum).get("sentimentScore", 0.5)  # Default a 0.5 se il campo non è presente
-    sentiment_factor = 1
-    adjusted_score = base_score * (1 + sentiment_score * 2 - 1 )  
-
-    print(base_score, sentiment_factor, adjusted_score)
-    return adjusted_score      """
-
-
-
 
 def parse_query(query_str):
-    return query_str, True
+    tokens = query_str.split()
+    tokens_to_keep = []
+    for field in globalVariables.sentimentFieldList:
+        for token in tokens:
+            if field in token:
+                tokens_to_keep.append(token)
+                tokens.remove(token)
+
+    tokens_to_keep_str = " ".join(tokens_to_keep)
+    tokens = " ".join(tokens).lower().split()
+    filtered_tokens = [token for token in tokens if token not in globalVariables.stop_words]
+
+    reviews = False
+    for word in globalVariables.review_words:
+        if word in filtered_tokens:
+            reviews = True
+            filtered_tokens.remove(word)   
+    if reviews:
+        return tokens_to_keep_str + " ".join(filtered_tokens), True
+    
+    for vehicleWord in globalVariables.uniqueVehicleWords:
+        if vehicleWord in filtered_tokens:
+            return tokens_to_keep_str + " ".join(filtered_tokens), False
+
+    
+    if len(tokens_to_keep) == 1 and "vehicleName" in tokens_to_keep[0] and reviews == False:
+        return tokens_to_keep_str + " ".join(filtered_tokens), False
+    
+    return tokens_to_keep_str + " ".join(filtered_tokens), True
+
     
 
 def full_text_mode(sentiment):
@@ -106,9 +122,7 @@ def full_text_mode(sentiment):
         if not query_str.strip():
             break
         query_str, reviews = parse_query(query_str)
-        if not sentiment:
-            reviews = True
-
+        
         if reviews:
             parser = MultifieldParser(fieldList, schema=index.schema) #search throughout all of the fields of the schema
         else:
@@ -128,7 +142,7 @@ def full_text_mode(sentiment):
                     new_results = searcher.search(query, limit=globalVariables.limit*i, scored=True)
                     extended_results.extend(new_results)
                     filtered_results = set([" ".join(hit.get('vehicleName').split()[0:2]) for hit in extended_results])
-                    if len(filtered_results) >= min(globalVariables.limit, len(results)) or len(extended_results) >= 50000: #to avoid an infinite loop we set a limit to "extended_results"
+                    if len(filtered_results) >= min(globalVariables.limit, len(results)) or len(extended_results) >= 1000: #to avoid an infinite loop we set a limit to "extended_results"
                         break
                     i+=1
 

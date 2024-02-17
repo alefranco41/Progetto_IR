@@ -1,11 +1,14 @@
 #full-text mode benchmark queries:
-1) tutte le recensioni di dodge -> vehicleName:dodge
-2) tutte le recensioni di ferrari contenenti la parola "amazing" nel testo e con punteggio 4 -> vehicleName:ferrari reviewText:amazing reviewRating:4
-3) tutte le recensioni di ferrari contenenti la parola "perfect" nel titolo e con punteggio 5 -> vehicleName:ferrari reviewTitle:perfect reviewRating:5
-4) tutte le recensioni di dodge contenenti la parola "ferrari" nella recensione -> vehicleName:dodge reviewText:ferrari
-5) tutte le recensioni di "Dodge Avenger Sedan" scritte nel 2018 e con punteggio 2 -> vehicleName:dodge avenger sedan reviewRating:2 reviewDate:2018
+1) trova le macchine "ferrari" -> ferrari
+2) trova le recensioni della macchina "ferrari scaglietti" -> ferrari scaglietti reviews
+3) trova le recensioni di ferrari contenenti la parola "amazing" nel testo e con punteggio 4 -> vehicleName:ferrari reviewText:amazing reviewRating:4
+4) trova le recensioni di "Dodge Avenger Sedan" scritte nel 2018 e con punteggio 2 -> vehicleName:dodge reviewRating:2 reviewDate:2018
+
 #word2vec benchmark queries
-1) this car is garbage
+1) recensioni simili a quelle che menzionano un buon rapporto qualità prezzo -> good value for money car
+2) recensioni simili a quelle che menzionano una buona accelerazione -> good acceleration
+3) recensioni simili a quelle che menzionano un cattivo consumo -> poor fuel economy
+
 #sentiment analysis benchmark queries
 1) recensioni di dodge che esprimono sentimento neutrale -> vehicleName:dodge sentimentLabel:neutral
 2) recensioni di ferrari che esprimono sentimento positivo -> vehicleName:dodge sentimentLabel:neutral

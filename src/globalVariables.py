@@ -24,6 +24,9 @@ except Exception:
 
 with open("vehicleNames.txt", "rb") as file:
     vehicleNames = pickle.load(file) 
+    vehicleWords = " ".join(vehicleNames)
+    uniqueVehicleWords = list(set(vehicleWords.lower().split()))
+
 
 terminal_width = shutil.get_terminal_size().columns
 str_separator = "-" * terminal_width
