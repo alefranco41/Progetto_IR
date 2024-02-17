@@ -14,7 +14,7 @@ schema = Schema(
     reviewID = NUMERIC(stored=True),
     reviewDate = DATETIME(stored=True),
     authorName = TEXT(stored=True),
-    rawVehicleName = TEXT(analyzer=StemmingAnalyzer(), stored=True),
+    rawVehicleName = TEXT(stored=True),
     reviewTitle = TEXT(stored=True),
     reviewText = TEXT(stored=True),
     reviewRating = NUMERIC(stored=True),
@@ -54,8 +54,9 @@ def addToIndex(index, csvFile, filename, sentimentModel):
                 #convert the second column as a valid date
                 reviewDate_str = row[1].replace(" on ", "")
                 reviewDate_str = reviewDate_str.replace(" (PDT)", "").replace(" (PST)", "")
-                reviewDate = datetime.strptime(reviewDate_str, "%m/%d/%y %H:%M %p")
-                
+                reviewDate = datetime.strptime(reviewDate_str, "%m/%d/%y %H:%M %p").date()
+                reviewDate = datetime(reviewDate.year, reviewDate.month, reviewDate.day).strftime("%Y-%m-%d")
+
                 try:
                     year = int(row[3].split()[0])
                 except Exception:
@@ -92,25 +93,21 @@ def addToIndex(index, csvFile, filename, sentimentModel):
                 reviewText = row[5]
                 reviewRating = float(row[6])
                 
-                
-                sentiment = sentimentModel(reviewTitle)[0]
-                
-    
-                # Somma i punteggi per ciascuna etichetta moltiplicati per i pesi
-                if sentiment['label'] == 'LABEL_1':
-                    aggregated_score = sentiment['score'] - (1 - sentiment['score'])
-                else:
-                    aggregated_score = (1 - sentiment['score']) - sentiment['score']
 
-                if aggregated_score > 0.05:
+
+                label = sentimentModel(reviewTitle)[0]['label']
+                sentiment = sentimentModel(reviewTitle)[0]['score']
+
+
+                if sentiment > 0.6 and label == "LABEL_1":
                     sentimentLabel = "positive"
-                elif aggregated_score < 0.05:
+                elif sentiment > 0.6 and label == "LABEL_0":
                     sentimentLabel = "negative"
                 else:
                     sentimentLabel = "neutral"
 
                 #add the row to the index as a document
-                writer.add_document(reviewID=reviewID, reviewDate=reviewDate, authorName=authorName, rawVehicleName=row[3], reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating, vehicleName=vehicleName, sentimentScore=aggregated_score, sentimentLabel=sentimentLabel)
+                writer.add_document(reviewID=reviewID, reviewDate=reviewDate, authorName=authorName, rawVehicleName=row[3], reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating, vehicleName=vehicleName, sentimentScore=sentiment, sentimentLabel=sentimentLabel)
                 print(f"The document {filename}:{reviewID} has been added to the index")
         except Exception as e:
             #if an error occurs, skip to the next row

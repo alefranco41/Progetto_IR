@@ -3,11 +3,10 @@
 2) tutte le recensioni di ferrari contenenti la parola "amazing" nel testo e con punteggio 4 -> vehicleName:ferrari reviewText:amazing reviewRating:4
 3) tutte le recensioni di ferrari contenenti la parola "perfect" nel titolo e con punteggio 5 -> vehicleName:ferrari reviewTitle:perfect reviewRating:5
 4) tutte le recensioni di dodge contenenti la parola "ferrari" nella recensione -> vehicleName:dodge reviewText:ferrari
-
+5) tutte le recensioni di "Dodge Avenger Sedan" scritte nel 2018 e con punteggio 2 -> vehicleName:dodge avenger sedan reviewRating:2 reviewDate:2018
 #word2vec benchmark queries
 1) this car is garbage
 #sentiment analysis benchmark queries
-1) vehicleName:dodge sentimentLabel:positive
-2)
-3)
-4)
+1) recensioni di dodge che esprimono sentimento neutrale -> vehicleName:dodge sentimentLabel:neutral
+2) recensioni di ferrari che esprimono sentimento positivo -> vehicleName:dodge sentimentLabel:neutral
+3) recensioni contenenti la parola "performance" che esprimono sentimento negativo oppure neutrale -> reviewText:performance sentimentLabel:neutral OR sentimentLabel:negative

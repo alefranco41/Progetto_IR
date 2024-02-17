@@ -57,7 +57,8 @@ def addToIndex(index, csvFile, filename, model):
                 #convert the second column as a valid date
                 reviewDate_str = row[1].replace(" on ", "")
                 reviewDate_str = reviewDate_str.replace(" (PDT)", "").replace(" (PST)", "")
-                reviewDate = datetime.strptime(reviewDate_str, "%m/%d/%y %H:%M %p")
+                reviewDate = datetime.strptime(reviewDate_str, "%m/%d/%y %H:%M %p").date()
+                reviewDate = datetime(reviewDate.year, reviewDate.month, reviewDate.day).strftime("%Y-%m-%d")
                 
                 
                 try:

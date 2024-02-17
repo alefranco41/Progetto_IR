@@ -34,7 +34,6 @@ def getIndex(dir):
 
 
 currentID = 0
-
 #store each row of each csv file to the index as a document
 def addToIndex(index, csvFile, filename):
     global currentID
@@ -48,8 +47,9 @@ def addToIndex(index, csvFile, filename):
                 #convert the second column as a valid date
                 reviewDate_str = row[1].replace(" on ", "")
                 reviewDate_str = reviewDate_str.replace(" (PDT)", "").replace(" (PST)", "")
-                reviewDate = datetime.strptime(reviewDate_str, "%m/%d/%y %H:%M %p")
-                
+                reviewDate = datetime.strptime(reviewDate_str, "%m/%d/%y %H:%M %p").date()
+                reviewDate = datetime(reviewDate.year, reviewDate.month, reviewDate.day).strftime("%Y-%m-%d")
+
                 
                 try:
                     year = int(row[3].split()[0])
@@ -87,7 +87,6 @@ def addToIndex(index, csvFile, filename):
                 reviewText = row[5]
                 reviewRating = float(row[6])
                 
-
                 #add the row to the index as a document
                 writer.add_document(reviewID=reviewID, reviewDate=reviewDate, authorName=authorName, rawVehicleName=row[3], reviewTitle=reviewTitle, reviewText=reviewText, reviewRating=reviewRating, vehicleName=vehicleName)
                 print(f"The document {filename}:{reviewID} has been added to the index")

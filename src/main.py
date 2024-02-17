@@ -1,5 +1,7 @@
 from whoosh.qparser import SimpleParser, MultifieldParser #enable multiple field search
+from whoosh.qparser.dateparse import DateParserPlugin
 from whoosh.analysis import Tokenizer
+from whoosh.scoring import BM25F
 from sys import exit
 from os import system
 import globalVariables
@@ -7,6 +9,17 @@ from word2Vec import preprocessing #preprocess the query for word2vec mode
 import pandas as pd
 import numpy as np
 
+
+class MyWeighting(BM25F):
+    use_final = True
+    def final(self, searcher, docnum, score):
+        sentiment_score = searcher.stored_fields(docnum).get("sentimentScore", 0.5)
+        sentiment_label = searcher.stored_fields(docnum).get("sentimentLabel", "neutral")
+        if sentiment_label == "negative":
+            sentiment_score = 1 - sentiment_score
+        sentiment_factor = sentiment_score * 2 - 1  
+        adjusted_score = score * (1 + sentiment_factor)  # Aggiungi uno sconto o un bonus basato sullo score di sentimento
+        return adjusted_score
 
 menu = """
 0) Exit
@@ -21,7 +34,7 @@ def print_hit_result(hit, reviews, sentiment):
     if reviews:
         print(f"Review ID: {hit.get('reviewID')}")
         print(f"Vehicle Name: {hit.get('rawVehicleName')}")
-        print(f"Review Date: {hit.get('reviewData')}")
+        print(f"Review Date: {hit.get('reviewDate')}")
         print(f"Author Name: {hit.get('authorName')}")
         print(f"Review Title: {hit.get('reviewTitle')}")
         print(f"Review Text: {hit.get('reviewText')}")
@@ -32,6 +45,7 @@ def print_hit_result(hit, reviews, sentiment):
     if sentiment:
         print(f"Sentiment Score: {hit.get('sentimentScore')}")
         print(f"Sentiment Label: {hit.get('sentimentLabel')}")
+        print(hit.score)
 
     print(globalVariables.str_separator)
 
@@ -57,7 +71,17 @@ def get_mode():
     system('clear')
     return mode_choice
 
-            
+"""def sass(searcher, fieldname, text, matcher):
+    base_score = matcher.score()
+    docnum = matcher.id()
+    sentiment_score = searcher.stored_fields(docnum).get("sentimentScore", 0.5)  # Default a 0.5 se il campo non è presente
+    sentiment_factor = 1
+    adjusted_score = base_score * (1 + sentiment_score * 2 - 1 )  
+
+    print(base_score, sentiment_factor, adjusted_score)
+    return adjusted_score      """
+
+
 
 
 def parse_query(query_str):
@@ -68,9 +92,12 @@ def full_text_mode(sentiment):
     if not sentiment:
         index = globalVariables.index
         fieldList = globalVariables.fieldList
+        searcher = index.searcher() #set the scoring system
     else:
         index = globalVariables.sentimentIndex
         fieldList = globalVariables.sentimentFieldList
+        searcher = index.searcher(weighting=MyWeighting)
+
     
     while True: 
         query_str = input("Insert query, press enter to stop: ")
@@ -87,9 +114,9 @@ def full_text_mode(sentiment):
         else:
             parser = SimpleParser("vehicleName", schema=index.schema) #search throughout all of the fields of the schema
         
-        
+        parser.add_plugin(DateParserPlugin())
+
         query = parser.parse(query_str) #parse the query
-        searcher = index.searcher() #set the scoring system
         results = searcher.search(query, limit=globalVariables.limit, scored=True) #set the document limit to 5 and enable the scoring
         if results: #if some results are retrieved
             if not reviews: #if we are searching about text items (vehicle names and not reviews)
