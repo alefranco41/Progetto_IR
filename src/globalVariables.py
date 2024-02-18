@@ -38,7 +38,7 @@ modes = {1: 'Full text search', 2:'Sentiment analysis', 3:'Word2Vec'}
 mode = 0  #chosen search engine mode
 mode_min = 1
 mode_max = 3
-limit = 5 #max amount of documents to show
+limit = 10 #max amount of documents to show
 
 words_to_remove = set(["car", "cars", "vehicle", "vehicles", "search", "find", "named"])
 stop_words = set(stopwords.words('english')).union(words_to_remove)

@@ -8,6 +8,7 @@ import globalVariables
 from word2Vec import preprocessing #preprocess the query for word2vec mode
 import pandas as pd
 import numpy as np
+from collections import OrderedDict
 
 
 class MyWeighting(BM25F):
@@ -74,16 +75,20 @@ def get_mode():
 def parse_query(query_str):
     tokens = query_str.split()
     tokens_to_keep = []
-    for field in globalVariables.sentimentFieldList:
-        for token in tokens:
-            if field in token:
-                tokens_to_keep.append(token)
-                tokens.remove(token)
 
-    tokens_to_keep_str = " ".join(tokens_to_keep)
+    for token in tokens[:]:  # Iterate over a copy of tokens to avoid modifying it directly
+        for field in globalVariables.sentimentFieldList:
+            if field in token or token in ["OR", "or", "AND", "and"]:
+                tokens_to_keep.append(token)
+
+    # Filter out tokens that need to be removed
+    tokens_to_keep = list(OrderedDict.fromkeys(tokens_to_keep))
+    tokens = [token for token in tokens if token not in tokens_to_keep]
+    tokens_to_keep_str = " ".join(tokens_to_keep) + " "
+
+
     tokens = " ".join(tokens).lower().split()
     filtered_tokens = [token for token in tokens if token not in globalVariables.stop_words]
-
     reviews = False
     for word in globalVariables.review_words:
         if word in filtered_tokens:
@@ -97,7 +102,7 @@ def parse_query(query_str):
             return tokens_to_keep_str + " ".join(filtered_tokens), False
 
     
-    if len(tokens_to_keep) == 1 and "vehicleName" in tokens_to_keep[0] and reviews == False:
+    if len(tokens_to_keep) == 1 and "vehicleName" in tokens_to_keep[0] and len(tokens) == 0:
         return tokens_to_keep_str + " ".join(filtered_tokens), False
     
     return tokens_to_keep_str + " ".join(filtered_tokens), True
@@ -106,8 +111,8 @@ def parse_query(query_str):
 
 def full_text_mode(sentiment):
     if not sentiment:
-        index = globalVariables.index
-        fieldList = globalVariables.fieldList
+        index = globalVariables.sentimentIndex
+        fieldList = globalVariables.sentimentFieldList
         searcher = index.searcher() #set the scoring system
     else:
         index = globalVariables.sentimentIndex
@@ -176,8 +181,40 @@ def word2Vec_mode():
         print(f"Mode: {globalVariables.modes[mode]}")
         if not query_str.strip():
             break
+        
+
+        query_str, reviews = parse_query(query_str)
+
+        tokens = query_str.split()
+        tokens_to_keep = []
+
+        for token in tokens[:]:  # Iterate over a copy of tokens to avoid modifying it directly
+            for field in globalVariables.sentimentFieldList:
+                if field in token or token in ["OR", "or", "AND", "and"]:
+                    tokens_to_keep.append(token)
+
+    # Filter out tokens that need to be removed
+        tokens_to_keep = list(OrderedDict.fromkeys(tokens_to_keep))
+        tokens = [token for token in tokens if token not in tokens_to_keep]
+        tokens_to_keep_str = " ".join(tokens_to_keep) + " "
+
+
         query_tokens = preprocessing(pd.Series(query_str))[0].split()
         query_embeddings = [globalVariables.word2VecModel[token] for token in query_tokens if token in globalVariables.word2VecModel]
+
+        query_embeddings = []
+        print(tokens)
+        for token in tokens_to_keep:
+            try:
+                if token.split(":")[1] in globalVariables.word2VecModel:
+                    query_embeddings.append(globalVariables.word2VecModel[token.split(":")[1]])
+            except IndexError:
+                continue
+            
+        for token in tokens:
+            if token in globalVariables.word2VecModel:
+                query_embeddings.append(globalVariables.word2VecModel[token])
+        
         if not query_embeddings:
             print("No valid tokens found in the query.")
             continue
@@ -189,15 +226,19 @@ def word2Vec_mode():
             search_results.append((doc, similarity))
 
         search_results.sort(key=lambda x: x[1], reverse=True)
-        parser = SimpleParser("reviewID", schema=globalVariables.index.schema) #search throughout all of the fields of the schema
+        parser = MultifieldParser(globalVariables.sentimentFieldList, schema=globalVariables.sentimentIndex.schema) #search throughout all of the fields of the schema
         print(f"Results for '{query_str}':\n")
         for i, (doc, similarity) in enumerate(search_results[:globalVariables.limit], 1):
-            print(f"Hit result #{i}")
-            print(f"Similarity: {similarity}\n")
-            query = parser.parse(str(doc)) #parse the query
+            query_str = f"reviewID:{str(doc)}"
+            query = parser.parse(query_str) #parse the query
             searcher = globalVariables.index.searcher() #set the scoring system
-            result = searcher.search(query, limit=1, scored=True) #set the document limit to 5 and enable the scoring
-            print_hit_result(result[0], True, False)
+            result = searcher.search(query, limit=None, scored=True) #set the document limit to 5 and enable the scoring
+            try:
+                print_hit_result(result[0], reviews, False)
+                print(f"Hit result #{i}")
+                print(f"Similarity: {similarity}\n")
+            except IndexError:
+                continue
 #main
 def main():
     global mode
